@@ -1,28 +1,41 @@
-import React, { useEffect, Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import { Container } from 'semantic-ui-react';
-import LoadingComponent from './LoadingComponent';
-import {observer} from 'mobx-react-lite';
-import ActivityStore from '../stores/activityStore';
-import ActivityDashboard from '../../features/activites/dashboard/ActivityDashboard';
 import NavBar from '../../features/nav/NavBar';
 
-const App = () => {
-  const activityStore = useContext(ActivityStore)
+import { observer } from 'mobx-react-lite';
+import { Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import ActivityDashboard from '../../features/activites/dashboard/ActivityDashboard';
+import ActivityDetails from '../../features/activites/details/ActivityDetails';
+import ActivityForm from '../../features/activites/form/ActivityForm';
+import HomePage from '../../features/home/HomePage';
 
-  useEffect(() => {
-    activityStore.loadActivities();
-  }, [activityStore]);
 
-  if (activityStore.loadingInitial) return <LoadingComponent content='Loading activities' />
+
+const App: React.FC<RouteComponentProps> = ({ location }) => {
+
 
   return (
     <Fragment>
-      <NavBar />
-      <Container style={{ marginTop: '7em' }}>
-        <ActivityDashboard />
-      </Container>
+      <Route exact path='/' component={HomePage} />
+      <Route
+        path={'/(.+)'}
+        render={() => (
+          <Fragment>
+            <NavBar />
+            <Container style={{ marginTop: '7em' }}>
+              <Route exact path='/activities' component={ActivityDashboard} />
+              <Route path='/activities/:id' component={ActivityDetails} />
+              <Route
+                key={location.key}
+                path={['/createActivity', '/manage/:id']}
+                component={ActivityForm}
+              />
+            </Container>
+          </Fragment>
+        )}
+      />
     </Fragment>
   );
 };
 
-export default observer(App);
+export default withRouter(observer(App));
